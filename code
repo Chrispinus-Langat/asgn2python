@@ -1,0 +1,31 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import  LinearRegression
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+# create a pandas DataFrame from the hypothetical data
+data = {'SpeedLimit':[30,50,40,60,35,55,45,65],
+       'RoadCondition':[1,2,3,1,2,3,1,2],
+        'Visibility':[1,2,1,3,2,1,2,3],
+        'AlcoholInvolved':[0,1,0,1,0,1,0,1],
+        'TimeOfDay':[1,2,1,2,1,2,1,2],
+        'AccidentSeverity':[1,3,2,4,1,3,2,4]}
+df = pd.DataFrame(data)
+
+#ocessing one-hot categorical features
+ct = ColumnTransformer(transformers=[('encoder',OneHotEncoder(),['RoadCondition','Visibility','TimeOfDay'])],remainder= 'passthrough')
+x = ct.fit_transform(df.drop('AccidentSeverity',axis=1))
+y = df['AccidentSeverity']
+
+#split data into training and testing sets
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+
+#create and train the linear model
+model = LinearRegression()
+model.fit(x_train, y_train)
+
+#save the model eg.using joblib
+import joblib
+joblib.dump(model,'accident_severity_model.pkl')
